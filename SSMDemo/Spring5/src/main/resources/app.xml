@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!--
+    这个是spring的配置文件书写的地方，可以理解为是一个注册中心
+    在这里去告诉spring我要什么，然后spring的核心容器会解析这个配置文件
+    根据元数据，去创建bean（一个个实例）
+
+    主要应用技术：
+        反射
+            根据全限定类名，然后配合默认构造器(如果没有默认构造器必然报错)来创建实例
+            并注册到spring的容器当中
+-->
+
+    <!--class：描述的是全限定类名-->
+    <bean class="com.sz.service.impl.PlayerServiceImpl" id="userService" scope="singleton"></bean>
+
+    <bean class="com.sz.pojo.Dog" id="dog">
+        <property name="partner" value="test_ref"></property>
+    </bean>
+
+    <bean class="com.sz.pojo.User" id="user">
+        <property name="name" value="test"></property>
+        <property name="age" value="19"></property>
+        <property name="dog" ref="dog"></property>
+    </bean>
+
+    <!--测试泛集合类型数据的注入-->
+    <bean class="com.sz.pojo.TestList" id="testList">
+        <property name="girls">
+            <array>
+                <value>girl1</value>
+                <value>girl2</value>
+            </array>
+        </property>
+
+        <property name="dogs">
+            <list>
+                <!--内部bean 不需要名字，外部也无法引用-->
+                <bean class="com.sz.pojo.Dog" p:partner="dog1"></bean>
+                <bean class="com.sz.pojo.Dog" p:partner="dog2"></bean>
+            </list>
+        </property>
+
+        <property name="luckyNumbers">
+            <set>
+                <value>1</value>
+                <value>3</value>
+            </set>
+        </property>
+
+        <property name="superDogs">
+            <map>
+                <entry key="dog1">
+                    <bean class="com.sz.pojo.Dog" p:partner="mapDog1"></bean>
+                </entry>
+                <entry key="dog2">
+                    <bean class="com.sz.pojo.Dog" p:partner="mapDog2"></bean>
+                </entry>
+            </map>
+        </property>
+
+        <property name="properties">
+            <props>
+                <prop key="user">root</prop>
+                <prop key="password">root</prop>
+            </props>
+        </property>
+    </bean>
+
+
+    <!--
+        autowire自动注入功能
+    -->
+    <bean class="com.sz.service.PayService" autowire="byName" id="payService">
+    </bean>
+    <!--注册一个pay-->
+    <bean class="com.sz.service.WxPay" id="wxPay"></bean>
+    <bean class="com.sz.service.AliPay" id="aliPay"></bean>
+</beans>

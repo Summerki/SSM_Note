@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    定义一个namespace 命名空间，我们可以唯一限定我们是用哪个文件
+-->
+
+<mapper namespace="com.smbms.mapper.UserMapper">
+
+    <cache flushInterval="1" eviction="LRU" size="10"></cache>
+
+    <!--
+        通过一系列的标签来完成的
+    -->
+
+    <!--sql语句可以不加分号-->
+    <select id="countUser" resultType="java.lang.Integer">
+        select count(*)
+        from smbms_user
+    </select>
+
+    <!--注意返回值不要写集合的类型，只需要描述集合里面是什么元素类型即可-->
+    <select id="queryAll" resultType="com.smbms.pojo.User">
+      select *
+      from smbms_user
+    </select>
+
+    <select id="queryByUserNameUserRole" resultType="com.smbms.pojo.User">
+      select * from smbms_user where userName like #{userName} and userRole=#{userRole}
+    </select>
+
+    <resultMap id="withRole" type="com.smbms.pojo.User">
+        <result column="userCode" property="userCode"></result>
+        <result column="userName" property="userName"></result>
+        <result column="roleName" property="userRoleName"></result>
+    </resultMap>
+
+    <select id="queryWithRole" resultMap="withRole">
+      select u.userCode,userName,r.roleName from smbms_user u, smbms_role r where u.userRole = r.id
+    </select>
+
+
+    <insert id="insert">
+        insert into smbms_user (id,userCode,userName) value(#{id},#{userCode},#{userName})
+    </insert>
+
+    <update id="update">
+        update smbms_user
+        set userCode = #{userCode},
+        userName = #{userName}
+        where id = #{id}
+    </update>
+
+    <update id="update2">
+        update smbms_user
+        set userPassword = #{password}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete
+        from smbms_user
+        where id=#{id}
+    </delete>
+
+    <resultMap id="userWithRole" type="com.smbms.pojo.User" >
+        <id column="userId" property="id"></id>
+        <result column="userCode" property="userCode"></result>
+        <result column="userName" property="userName"></result>
+        <!--role封装 指定一下数据类型-->
+        <association property="role" javaType="com.smbms.pojo.Role">
+            <id column="roleId" property="id"></id>
+            <result column="roleName" property="roleName"></result>
+        </association>
+    </resultMap>
+    <select id="queryByIdWithRole" resultMap="userWithRole">
+      select u.id userId, u.userCode, u.userName, r.id roleId, r.roleName
+      from smbms_user u, smbms_role r
+      where u.userRole = r.id
+      and u.id = #{id}
+    </select>
+
+
+
+    <!--测试动态SQL-->
+    <!--
+    where功能：
+        1、能够去除多余的and or  但是只能处理前缀写法
+        2、如果一个条件都没有，就where省略
+    -->
+    <select id="queryByIdUserName" resultType="com.smbms.pojo.User">
+      select *
+      from smbms_user
+      <where>
+          <if test="id != null">
+              and id = #{id}
+          </if>
+          <if test="userName != null and userName != ''">  <!--多条件可以用and连接-->
+              <bind name="newUserName" value="'%'+userName+'%'"></bind>
+              and userName like #{newUserName}
+          </if>
+      </where>
+    </select>
+
+    <select id="selectById" resultType="com.smbms.pojo.User">
+        select *
+        from smbms_user
+        <where>
+            id = #{id}
+        </where>
+    </select>
+
+    <!--
+        set
+        可以处理后置的多余的逗号
+    -->
+    <update id="update3">
+      update smbms_user
+      <trim prefix="set" suffixOverrides=",">
+          <if test="userCode != null">
+            userCode = #{userCode},
+          </if>
+          <if test="userName != null">
+            userName = #{userName},
+          </if>
+          <if test="userPassword != null">
+            userPassword = #{userPassword},
+          </if>
+      </trim>
+      <!--<set>-->
+        <!--<if test="userCode != null">-->
+          <!--userCode = #{userCode},-->
+        <!--</if>-->
+        <!--<if test="userName != null">-->
+          <!--userName = #{userName},-->
+        <!--</if>-->
+        <!--<if test="userPassword != null">-->
+            <!--userPassword = #{userPassword},-->
+        <!--</if>-->
+      <!--</set>-->
+      <trim prefix="where" prefixOverrides="and">
+          <if test="id != null">
+            and id = #{id}
+          </if>
+      </trim>
+      <!--<where>-->
+          <!--<if test="id != null">-->
+            <!--and id = #{id}-->
+          <!--</if>-->
+      <!--</where>-->
+    </update>
+
+
+    <!--
+    对应原SQL语句：  select * from smbms_user WHERE id in(?,?,?,?)
+    现在理解foreach标签里面的open close separator 什么意思了吧
+    -->
+    <select id="queryByIds" resultType="com.smbms.pojo.User">
+      select *
+      from smbms_user
+      <where>
+          id in
+          <foreach collection="list" open="(" close=")" item="item" separator="," index="index">
+            #{item}
+          </foreach>
+      </where>
+    </select>
+
+
+    <select id="queryByRole" resultType="com.smbms.pojo.User">
+        select
+            <choose>
+                <when test="userRole == 1">
+                    id,userCode,userName,userPassword
+                </when>
+                <when test="userRole == 2">
+                    id,userCode,userName
+                </when>
+                <otherwise>
+                    id,userName
+                </otherwise>
+            </choose>
+        from smbms_user
+
+    </select>
+</mapper>

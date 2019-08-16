@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <!--核心配置-->
+
+    <!--
+        通过resource属性引入外部的属性文件
+        引入外部之后它的优先级高于内部书写的内容
+        里面的<property>写错某些value或者干脆不写都行，只要外部文件是对的即可
+    -->
+    <properties resource="db.properties">
+        <!--<property name="driver" value="com.mysql.jdbc.Driver"></property>-->
+        <!--<property name="url" value="jdbc:mysql://localhost:3306/smbms"></property>-->
+        <!--<property name="username" value="root"></property>-->
+        <!--<property name="password" value=""></property>-->
+    </properties>
+
+    <!--直接抄官网的-->
+    <settings>
+        <setting name="logImpl" value="LOG4J"/>
+        <!--开启二级缓存-->
+        <setting name="cacheEnabled" value="true"></setting>
+    </settings>
+
+    <!--<typeAliases>-->
+        <!--<typeAlias type="com.smbms.pojo.User" alias="heroUser"></typeAlias>-->
+        <!--<package name="com.smbms.pojo"></package>-->
+    <!--</typeAliases>-->
+
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="POOLED">
+                <!--配置连接数据库的四个基本属性-->
+                <property name="driver" value="${driver}"></property>
+                <property name="url" value="${url}"></property>
+                <property name="username" value="${username}"></property>
+                <property name="password" value="${password}"></property>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--
+        将mapper文件引入到mybatis核心配置文件之中
+    -->
+    <mappers>
+        <!--只有写了这一行，mybatis才知道这个文件的存在-->
+        <mapper resource="mapper/UserMapper.xml"></mapper>
+
+        <mapper resource="mapper/RoleMapper.xml"></mapper>
+    </mappers>
+</configuration>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.smbms.mapper.RoleMapper">
+    <resultMap id="withUser" type="com.smbms.pojo.Role">
+        <id column="roleId" property="id"></id>
+        <result column="roleCode" property="roleCode"></result>
+        <result column="roleName" property="roleName"></result>
+        <!--
+            封装用户信息
+            需要描述集合里面的元素数据类型是什么
+        -->
+        <collection property="users" ofType="com.smbms.pojo.User">
+            <id column="userId" property="id"></id>
+            <result column="userCode" property="userCode"></result>
+            <result column="userName" property="userName"></result>
+        </collection>
+    </resultMap>
+
+    <!--查询的时候一定要避免出现重名,所以将r.id和u.id起了别名-->
+    <select id="queryWithUser" resultMap="withUser">
+      select r.id roleId, roleCode, roleName, u.id userId, u.userCode, u.userName
+      from smbms_role r, smbms_user u
+      where r.id = u.userRole
+      and r.id = #{id}
+    </select>
+</mapper>
