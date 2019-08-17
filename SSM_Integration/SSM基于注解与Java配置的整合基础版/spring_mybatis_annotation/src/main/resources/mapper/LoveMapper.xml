@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.suki.mapper.LoveMapper">
+    <insert id="insert">
+        insert into love (first_name,last_name,birth)
+        value(#{firstName},#{lastName},#{birth})
+    </insert>
+
+    <select id="selectById" resultType="com.suki.model.Love">
+      select *
+      from love where love_id = #{id}
+    </select>
+</mapper>
